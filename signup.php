@@ -1,19 +1,35 @@
 <?php
     if(isset($_POST["submit"])){
         include 'conf.php';
+        session_start();
 
         // 1-  get data
-        $name = mysqli_real_escape_string($con, $_POST["name"]);
-        $password = mysqli_real_escape_string($con, md5($_POST["password"]));
-        $email = mysqli_real_escape_string($con, $_POST["email"]);
+        $name = mysqli_real_escape_string($con, htmlspecialchars($_POST["name"]));
+        $password = mysqli_real_escape_string($con, htmlspecialchars($_POST["password"]));
+        $email = mysqli_real_escape_string($con, htmlspecialchars($_POST["email"]));
 
-        // 2- check data
-        $select = mysqli_query($con, "SELECT * FROM users WHERE name='$name' AND password='$password'");
-        if($row = mysqli_fetch_assoc($select)){
-            // 4- heading to index
-            header("location:index.php");
-        }else{
-            $messages[] = 'incorrect name or password!';
+        // 2- validate data
+        if(preg_match('/^[a-zA-Z]{2,}(?: [a-zA-Z]{2,})*$', $name)){
+            $messages[] = 'every name must be 2 or more letters and only use letters and digits';
+        }if(preg_match("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", $email)){
+            $messages[] = "The email is not valid. Please check that it follows the format: user@example.com.";
+        }if(preg_match("^(?=.*[a-zA-Z])[A-Za-z\d@$!%*?&]{6,}$", $password)){
+            $messages[] = "the password is not valid. it must have at least one letter and length 6 or more";
+        }if(!isset($messages)){
+            $select = mysqli_query($con, "SELECT * FROM users WHERE name='$name'");
+            if($row = mysqli_fetch_assoc($select)){
+                $messages[] = 'existed name. please try another name';
+            }else{
+                // 3- store data
+                $password = md5($password);
+                $insert = "INSERT INTO products (name, password, email) VALUES ('$name', '$password', '$email')";
+                mysql_query($con, $insert);
+                $select = mysqli_query($con, "SELECT * FROM users WHERE name='$name' AND password='$password'");
+                $row = mysqli_fetch_assoc($select);
+                $_SESSION["user_id"] = $row["id"];
+                // 4- heading to index
+                header("location:index.php");
+            }
         }
 
     }
