@@ -9,11 +9,11 @@
         $email = mysqli_real_escape_string($con, htmlspecialchars($_POST["email"]));
 
         // 2- validate data
-        if(preg_match('/^[a-zA-Z]{2,}(?: [a-zA-Z]{2,})*$', $name)){
+        if(!preg_match('/^[a-zA-Z]{2,}(?: [a-zA-Z]{2,})*$/', $name)){
             $messages[] = 'every name must be 2 or more letters and only use letters and digits';
-        }if(preg_match("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", $email)){
+        }if(!preg_match("/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/", $email)){
             $messages[] = "The email is not valid. Please check that it follows the format: user@example.com.";
-        }if(preg_match("^(?=.*[a-zA-Z])[A-Za-z\d@$!%*?&]{6,}$", $password)){
+        }if(!preg_match("/^[A-Za-z\d@$!%*?&]{4,}$/", $password)){
             $messages[] = "the password is not valid. it must have at least one letter and length 6 or more";
         }if(!isset($messages)){
             $select = mysqli_query($con, "SELECT * FROM users WHERE name='$name'");
@@ -22,8 +22,8 @@
             }else{
                 // 3- store data
                 $password = md5($password);
-                $insert = "INSERT INTO products (name, password, email) VALUES ('$name', '$password', '$email')";
-                mysql_query($con, $insert);
+                $insert = "INSERT INTO users (name, password, email) VALUES ('$name', '$password', '$email')";
+                mysqli_query($con, $insert);
                 $select = mysqli_query($con, "SELECT * FROM users WHERE name='$name' AND password='$password'");
                 $row = mysqli_fetch_assoc($select);
                 $_SESSION["user_id"] = $row["id"];
