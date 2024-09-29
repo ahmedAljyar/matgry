@@ -39,7 +39,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Document</title>
+    <title>Sign Up</title>
     <link rel="stylesheet" href="bootstrap.css">
 </head>
 <body>
